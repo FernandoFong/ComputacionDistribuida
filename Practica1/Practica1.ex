@@ -58,10 +58,10 @@ defmodule Module1 do
     #y determinar cuál es la probabilidad de que salga un número aleatorio
     #entre [k, n], el chiste obtener el número aleatorio.
     k = :rand.uniform(n)
-    IO.puts("Número aleatorio seleccionado: #{inspect k}")
     prob_num = 1 / n
-    prob_k = ((n - k) * prob_num) + 0.1
-    IO.puts("La probabilidad de que salga un número entre k y n es de #{inspect prob_k}")
+    prob_k = (k * prob_num)
+    prob_k = Float.round(prob_k,2)
+    "La probabilidad de que salga un número entre [#{inspect k}, #{inspect n}] es de #{inspect prob_k}"
   end
 
   @doc """
