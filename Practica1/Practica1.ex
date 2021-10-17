@@ -230,7 +230,39 @@ end
 defmodule Module4 do
 
   def monstructure() do
-    :ok
+    pid = spawn(fn -> server end)
+    #send(pid, {:delete, :list, self(), 1})
+    #send(pid, {:put, :list, self(), 5})
+    #send(pid, {:length, :list, self()})
+    receive do
+      {:ok, :delete, :list} ->
+        "Se elimino correctamente el elemento de la lista."
+      {:ok, :put, :list} ->
+        "Se agrego el elemento a la lista."
+      {:ok, :lenght, :list, length} ->
+        "El tamaño de la lista es #{inspect length}."
+    after
+      10_000 -> "Se rebaso el tiempo de espera."
+    end
+  end
+
+  # {:petición, :estructura, remitente, <elementos>}
+  def server() do
+    l = [1,2,3,4]
+    t = {}
+    m = Map.new()
+    ms = MapSet.new()
+    receive do
+      {:delete, :list, rem, elem} ->
+        l = List.delete(l,elem)
+        send(rem, {:ok, :delete, :list})
+      {:put, :list, rem, elem} ->
+        l ++ [elem]
+        send(rem, {:ok, :put, :list})
+      {:length, :list, rem} ->
+        length = length(l)
+        send(rem, {:ok, :length, :list, length})
+    end
   end
 
 end
