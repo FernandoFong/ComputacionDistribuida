@@ -107,7 +107,7 @@ defmodule Module2 do
     Función test.
   """
   def test do
-    fn -> end
+    fn x -> x end
     :ok
   end
 
@@ -146,8 +146,8 @@ defmodule Module3 do
     Función que busca exhaustivamente si el elemento x se encuentra dentro
     de la lista [y|ys].
   """
-  def is_rep(x,[]), do: false
-  def is_rep(x,[y | ys]) do
+  defp is_rep(_,[]), do: false
+  defp is_rep(x,[y | ys]) do
     if x == y do
       true
     else
@@ -163,8 +163,8 @@ defmodule Module3 do
     buscando sobre la lista original. Los elementos que descubra que
     ya ha revisado, los va a ignorar.
   """
-  def sin_rep([],l), do: l
-  def sin_rep([x|xs],l) do
+  defp sin_rep([],l), do: l
+  defp sin_rep([x|xs],l) do
     if is_rep(x,l) do
       sin_rep(xs,l)
     else
@@ -196,6 +196,7 @@ defmodule Module3 do
       prims = []
       comps = []
       prims = sieve_of_erathostenes_recursion(nums, prims, comps)
+      prims
     end
   end
 
@@ -213,8 +214,8 @@ defmodule Module3 do
     mentos que sean compuestos, para evitar tener que evaluarlos
     nuevamente. Esto mejora ligeramente la eficienca.
   """
-  def sieve_of_erathostenes_recursion([], prims, _), do: prims
-  def sieve_of_erathostenes_recursion([x | xs], prims, comps) do
+  defp sieve_of_erathostenes_recursion([], prims, _), do: prims
+  defp sieve_of_erathostenes_recursion([x | xs], prims, comps) do
     if !(x in  comps) do
       prims = prims ++ [x]
       comps = comps ++ Enum.filter(xs, fn y -> (rem(y,x) == 0) && !(y in comps) end)
@@ -282,7 +283,7 @@ defmodule Module4 do
   end
 
   # {:petición, :estructura, remitente, <elementos>}
-  def server() do
+  defp server() do
     l = [1,2,3,4,5]
     t = {1, :a, 4}
     m = Map.new([{:a,1},{:b,2}])
