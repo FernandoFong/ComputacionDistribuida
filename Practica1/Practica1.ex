@@ -231,37 +231,71 @@ defmodule Module4 do
 
   def monstructure() do
     pid = spawn(fn -> server end)
-    #send(pid, {:delete, :list, self(), 1})
-    #send(pid, {:put, :list, self(), 5})
+    #send(pid, {:delete, :list, self(), 3})
+    #send(pid, {:put, :list, self(), 6})
     #send(pid, {:length, :list, self()})
+    send(pid, {:algo, :list, self()})
+    #send(pid, {:get, :tuple, self()})
+    #send(pid, {:set, :tuple, self(), :b, 1})
+    #send(pid, {:to_list, :tuple, self()})
+    #send(pid, {:algo, :tuple, self()})
     receive do
       {:ok, :delete, :list} ->
         "Se elimino correctamente el elemento de la lista."
       {:ok, :put, :list} ->
         "Se agrego el elemento a la lista."
-      {:ok, :lenght, :list, length} ->
+      {:ok, :length, :list, length} ->
         "El tamaño de la lista es #{inspect length}."
+      {:ok, :get, :tuple, t} ->
+        "La tupla es #{inspect t}"
+      {:ok, :set, :tuple} ->
+        "La tupla se actualizó correctamente."
+      {:ok, :to_list, :tuple, tl} ->
+        tl
+      {:error, :op_invalida} ->
+        :op_error
     after
-      10_000 -> "Se rebaso el tiempo de espera."
+      1_000 -> "Se rebaso el tiempo de espera."
     end
   end
 
   # {:petición, :estructura, remitente, <elementos>}
   def server() do
-    l = [1,2,3,4]
-    t = {}
+    l = [1,2,3,4,5]
+    t = {1, :a, 4}
     m = Map.new()
     ms = MapSet.new()
     receive do
       {:delete, :list, rem, elem} ->
-        l = List.delete(l,elem)
+        l = List.delete(l, elem)
         send(rem, {:ok, :delete, :list})
-      {:put, :list, rem, elem} ->
-        l ++ [elem]
+      {:put, :list, rem, value} ->
+        l = l ++ [value]
         send(rem, {:ok, :put, :list})
       {:length, :list, rem} ->
         length = length(l)
         send(rem, {:ok, :length, :list, length})
+      {p, :list, rem} ->
+        IO.puts("No se reconoce la petición #{inspect p} para listas")
+        send(rem, {:error, :op_invalida})
+      {p, :list, rem, _} ->
+        IO.puts("No se reconoce la petición #{inspect p} para listas")
+        send(rem, {:error, :op_invalida})
+      {:get, :tuple, rem} ->
+        send(rem, {:ok, :get, :tuple, t})
+      {:set, :tuple, rem, value, i} ->
+        t = Tuple.delete_at(t, i)
+        t = Tuple.insert_at(t, i, value)
+        send(rem, {:ok, :set, :tuple})
+      {:to_list, :tuple, rem} ->
+        tl = Tuple.to_list(t)
+        send(rem, {:ok, :to_list, :tuple, tl})
+      {p, :tuple, rem} ->
+        IO.puts("No se reconoce la petición #{inspect p} para tuplas")
+        send(rem, {:error, :op_invalida})
+      {p, :tuple, rem, _} ->
+        IO.puts("No se reconoce la petición #{inspect p} para tuplas")
+        send(rem, {:error, :op_invalida})
     end
   end
 
