@@ -234,11 +234,15 @@ defmodule Module4 do
     #send(pid, {:delete, :list, self(), 3})
     #send(pid, {:put, :list, self(), 6})
     #send(pid, {:length, :list, self()})
-    send(pid, {:algo, :list, self()})
+    #send(pid, {:algo, :list, self()})
     #send(pid, {:get, :tuple, self()})
     #send(pid, {:set, :tuple, self(), :b, 1})
     #send(pid, {:to_list, :tuple, self()})
     #send(pid, {:algo, :tuple, self()})
+    #send(pid, {:put, :map, self(), :l, 3})
+    #send(pid, {:get_value, :map, self(), :d})
+    #send(pid, {:eval_lamb, :map, self(), :a, fn x, y -> x + y end, 5})
+    #send(pid, {:algo, :map, self()})
     receive do
       {:ok, :delete, :list} ->
         "Se elimino correctamente el elemento de la lista."
@@ -252,8 +256,16 @@ defmodule Module4 do
         "La tupla se actualizó correctamente."
       {:ok, :to_list, :tuple, tl} ->
         tl
+      {:ok, :put, :map} ->
+        "Se agrego al diccionario correctamente la llave y el valor."
+      {:ok, :get_value, :map, value} ->
+        "El elemento asociado con la llave es #{inspect value}"
+      {:ok, :eval_lamb, :map, value} ->
+        "El resultado de la operación es #{inspect value}"
       {:error, :op_invalida} ->
         :op_error
+      {:error, :not_found} ->
+        :not_found_error
     after
       1_000 -> "Se rebaso el tiempo de espera."
     end
@@ -263,7 +275,7 @@ defmodule Module4 do
   def server() do
     l = [1,2,3,4,5]
     t = {1, :a, 4}
-    m = Map.new()
+    m = Map.new([{:a,1},{:b,2}])
     ms = MapSet.new()
     receive do
       {:delete, :list, rem, elem} ->
@@ -295,6 +307,27 @@ defmodule Module4 do
         send(rem, {:error, :op_invalida})
       {p, :tuple, rem, _} ->
         IO.puts("No se reconoce la petición #{inspect p} para tuplas")
+        send(rem, {:error, :op_invalida})
+      {:put, :map, rem, key, elem} ->
+        m = Map.put(m, key, elem)
+        send(rem, {:ok, :put, :map})
+      {:get_value, :map, rem, key} ->
+        v = Map.get(m, key)
+        if v != nil do
+          send(rem, {:ok, :get_value, :map, v})
+        else
+          IO.puts("No se encontro el elemento.")
+          send(rem, {:error, :not_found})
+        end
+      {:eval_lamb, :map, rem, key, fun, op} ->
+        v = Map.get(m, key)
+        res = fun.(v,op)
+        send(rem, {:ok, :eval_lamb, :map, res})
+      {p, :map, rem} ->
+        IO.puts("No se reconoce la petición #{inspect p} para mapas")
+        send(rem, {:error, :op_invalida})
+      {p, :map, rem, _} ->
+        IO.puts("No se reconoce la petición #{inspect p} para mapas")
         send(rem, {:error, :op_invalida})
     end
   end
