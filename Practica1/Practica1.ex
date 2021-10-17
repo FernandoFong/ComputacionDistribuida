@@ -243,6 +243,10 @@ defmodule Module4 do
     #send(pid, {:get_value, :map, self(), :d})
     #send(pid, {:eval_lamb, :map, self(), :a, fn x, y -> x + y end, 5})
     #send(pid, {:algo, :map, self()})
+    #send(pid, {:in, :map_set, self(), 10})
+    #send(pid, {:size, :map_set, self()})
+    #send(pid, {:put, :map_set, self(), 15})
+    send(pid, {:algo, :map_set, self()})
     receive do
       {:ok, :delete, :list} ->
         "Se elimino correctamente el elemento de la lista."
@@ -259,9 +263,15 @@ defmodule Module4 do
       {:ok, :put, :map} ->
         "Se agrego al diccionario correctamente la llave y el valor."
       {:ok, :get_value, :map, value} ->
-        "El elemento asociado con la llave es #{inspect value}"
+        "El elemento asociado con la llave es #{inspect value}."
       {:ok, :eval_lamb, :map, value} ->
-        "El resultado de la operación es #{inspect value}"
+        "El resultado de la operación es #{inspect value}."
+      {:ok, :in, :map_set, i} ->
+        "Es #{inspect i} que el elemento esta en el conjunto."
+      {:ok, :size, :map_set, size} ->
+        "El tamaño del conjunto es #{inspect size}."
+      {:ok, :put, :map_set} ->
+        "Se agrego el elemento correctamente."
       {:error, :op_invalida} ->
         :op_error
       {:error, :not_found} ->
@@ -276,7 +286,7 @@ defmodule Module4 do
     l = [1,2,3,4,5]
     t = {1, :a, 4}
     m = Map.new([{:a,1},{:b,2}])
-    ms = MapSet.new()
+    ms = MapSet.new([1,2,3,4,5,6,7,8,9,1,2,3])
     receive do
       {:delete, :list, rem, elem} ->
         l = List.delete(l, elem)
@@ -324,10 +334,26 @@ defmodule Module4 do
         res = fun.(v,op)
         send(rem, {:ok, :eval_lamb, :map, res})
       {p, :map, rem} ->
-        IO.puts("No se reconoce la petición #{inspect p} para mapas")
+        IO.puts("No se reconoce la petición #{inspect p} para diccionarios.")
         send(rem, {:error, :op_invalida})
       {p, :map, rem, _} ->
-        IO.puts("No se reconoce la petición #{inspect p} para mapas")
+        IO.puts("No se reconoce la petición #{inspect p} para diccionarios.")
+        send(rem, {:error, :op_invalida})
+      {:in, :sap_set, rem, elem} ->
+        i = MapSet.member?(ms, elem)
+        send(rem, {:ok, :in, :map_set, i})
+      {:size, :map_set, rem} ->
+        li_map = MapSet.to_list(ms)
+        size = length(li_map)
+        send(rem,{:ok, :size, :map_set, size})
+      {:put, :map_set, rem, elem} ->
+        ms = MapSet.put(ms, elem)
+        send(rem, {:ok, :put, :map_set})
+      {p, :map_set, rem} ->
+        IO.puts("No se reconoce la petición #{inspect p} para conjuntos.")
+        send(rem, {:error, :op_invalida})
+      {p, :map_set, rem, _} ->
+        IO.puts("No se reconoce la petición #{inspect p} para conjuntos.")
         send(rem, {:error, :op_invalida})
     end
   end
