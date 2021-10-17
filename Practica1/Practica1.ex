@@ -208,12 +208,17 @@ defmodule Module3 do
     va a descubrir los números compuestos que génera en la lista
     orginal. Esto es, aplicando módulo, utilizando la función de
     Enum, filter.
+
+    Adicionalmente, eliminara de la lista original todos los ele-
+    mentos que sean compuestos, para evitar tener que evaluarlos
+    nuevamente. Esto mejora ligeramente la eficienca.
   """
   def sieve_of_erathostenes_recursion([], prims, _), do: prims
   def sieve_of_erathostenes_recursion([x | xs], prims, comps) do
     if !(x in  comps) do
       prims = prims ++ [x]
       comps = comps ++ Enum.filter(xs, fn y -> (rem(y,x) == 0) && !(y in comps) end)
+      xs = Enum.filter(xs, fn x -> !(x in comps) end)
       sieve_of_erathostenes_recursion(xs, prims, comps)
     else
       sieve_of_erathostenes_recursion(xs, prims, comps)
