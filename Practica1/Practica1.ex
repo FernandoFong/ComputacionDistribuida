@@ -181,8 +181,43 @@ defmodule Module3 do
     l = sin_rep(l, [])
   end
 
+  @doc """
+    Calcula los primos en los primeros 100 números. Para esto, se va a
+    hacer uso de 3 estrcutras auxiliares. Una lista con los números en
+    el rango 2 a n. Una lista que guardará a los primos encontrados, y
+    una lista que guardará a los números compuestos que se generen.
+  """
   def sieve_of_erathostenes(n) do
-    :ok
+    if n < 2 do
+      "La entrada es inválida."
+    else
+      rango = 2 .. n
+      nums = Enum.to_list(rango)
+      prims = []
+      comps = []
+      prims = sieve_of_erathostenes_recursion(nums, prims, comps)
+    end
+  end
+
+  @doc """
+    Función auxiliar, va a recorrer la lista en el rango 2 a n,
+    y va a vérificar que el elemento en la cabeza n, no sea un
+    número compuesto.
+
+    Si esto se cumple, va a agregar a x a los números primos, y
+    va a descubrir los números compuestos que génera en la lista
+    orginal. Esto es, aplicando módulo, utilizando la función de
+    Enum, filter.
+  """
+  def sieve_of_erathostenes_recursion([], prims, _), do: prims
+  def sieve_of_erathostenes_recursion([x | xs], prims, comps) do
+    if !(x in  comps) do
+      prims = prims ++ [x]
+      comps = comps ++ Enum.filter(xs, fn y -> (rem(y,x) == 0) && !(y in comps) end)
+      sieve_of_erathostenes_recursion(xs, prims, comps)
+    else
+      sieve_of_erathostenes_recursion(xs, prims, comps)
+    end
   end
 
 end
