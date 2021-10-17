@@ -142,8 +142,43 @@ end
 
 defmodule Module3 do
 
-  def rev(l) do
-    :ok
+  @doc """
+    Función que busca exhaustivamente si el elemento x se encuentra dentro
+    de la lista [y|ys].
+  """
+  def is_rep(x,[]), do: false
+  def is_rep(x,[y | ys]) do
+    if x == y do
+      true
+    else
+      is_rep(x,ys)
+    end
+  end
+
+  @doc """
+    Generá una lista auxiliar sin repeticiones. Para esto busca si el
+    elemento no ha sido ya añadido a la lista auxiliar.
+
+    Si el elemento no ha sido explorado, lo agrega a la lista y sigue
+    buscando sobre la lista original. Los elementos que descubra que
+    ya ha revisado, los va a ignorar.
+  """
+  def sin_rep([],l), do: l
+  def sin_rep([x|xs],l) do
+    if is_rep(x,l) do
+      sin_rep(xs,l)
+    else
+      sin_rep(xs, l ++ [x])
+    end
+  end
+
+  @doc """
+    Para la implementación se va a recurrir a crear una lista auxiliar
+    (que inicializa en vacía), donde va a agregar los elementos que no
+    hayan aparecido en la lista original.
+  """
+  def elim_dup(l) do
+    l = sin_rep(l, [])
   end
 
   def sieve_of_erathostenes(n) do
