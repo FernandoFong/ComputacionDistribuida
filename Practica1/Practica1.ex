@@ -4,7 +4,7 @@ defmodule Module1 do
           * Fibonacci
 	  * Factorial
 	  * Random
-	  * Digits?
+	  * Digits
   """
   
   @doc """
@@ -58,12 +58,28 @@ defmodule Module1 do
   end
 
   @doc """
-  digits: ?
+  digits: regresa los digitos de n a manera de lista.
   """
   def digits(n) do
-    n
+    if(n<10) do
+      [n+48]
+    else
+      getdigits(n, [])
+    end
   end
 
+  @doc """
+  getdigits: función auxiliar que concatena el ultimo digito
+            de n en nums.
+  """
+  defp getdigits(n, nums) do
+    if(n < 10) do
+      [n|nums]
+    else
+      digit = rem(n, 10)
+      n |> div(10) |> getdigits([digit|nums])
+    end
+  end
 end
 
 defmodule Module2 do
