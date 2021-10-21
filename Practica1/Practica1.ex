@@ -36,9 +36,8 @@ defmodule Module1 do
     Para el caso de n, hace la misma evaluación que en el caso anterior.
   """
   def factorial(0), do: 1
-  def factorial(1), do: 1
   def factorial(n) do
-    if n > 1 && is_number(n) do
+    if n > 0 && is_number(n) do
       n * factorial(n-1)
     else
       IO.puts("La entrada #{inspect n} es inválida.")
@@ -60,8 +59,7 @@ defmodule Module1 do
     k = :rand.uniform(n)
     prob_num = 1 / n
     prob_k = (k * prob_num)
-    prob_k = Float.round(prob_k,2)
-    "La probabilidad de que salga un número entre [#{inspect k}, #{inspect n}] es de #{inspect prob_k}"
+    "La probabilidad de que salga el valor k = #{inspect k} es de #{inspect prob_k}"
   end
 
   @doc """
