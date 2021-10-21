@@ -248,15 +248,10 @@ defmodule Module4 do
     abrirá y consumirá su buzón con la función auxiliar, buzon/1.
   """
   def monstructure() do
-    # En este caso se implemento una función recursiva que mantiene
-    # al canal ecuchando, por eso en cada llamada, debe de mandar las
-    # estrcutrudas de datos.
+    # Inicia el servidor
+    pid = spawn(fn -> server_init() end)
 
-    # Ninguna operación agrega elementos a la tupla, por lo que para el
-    # ejemplo, esta no se inicializa en vacío.
-    pid = spawn(fn -> server([], {:a, 2, "a", 3, :b}, Map.new, MapSet.new, true) end)
-
-    # Secuencias de ejemplos para cada estructura.
+    # Secuencias de ejemplos que se hicieron para cada estructura.
     #ejemplos_listas(pid)
     #ejemplos_tuplas(pid)
     #ejemplos_diccionarios(pid)
@@ -419,6 +414,19 @@ defmodule Module4 do
     else
       "Nada más en el buzón."
     end
+  end
+
+  @doc """
+    Función auxiliar, que inicializa la estructura de datos, y simplemente
+    llama a la función que va ser nuestro buzón escuchando mensajes.
+
+    Todas las estructuras de datos, empiezan vacías, excepto por las tuplas.
+    En nuestras llamas, no tenemos ninguna que agregue valores a esta estruc-
+    tura, por lo que, para empezar a trabajar, la inicializamos con valores
+    determinados.
+  """
+  defp server_init() do
+    server([], {:a, 2, "a", 3, :b}, Map.new, MapSet.new, true)
   end
 
   @doc """
