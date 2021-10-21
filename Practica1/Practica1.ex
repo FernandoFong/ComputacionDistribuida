@@ -122,17 +122,25 @@ defmodule Module2 do
   end
 
   @doc """
-    La forma en la que podemos saber si la ecuación a x ~= b mod n. Es caculando el mcd de a y n, si
-    este es 1, significa que a y n son primos relativos y por lo tanto tienen solución. En otro caso
-    significa que no son primos relativos y que la ecuación no tiene solución.
+    Una congruencia lineal tiene solución sí y solo sí, b es divisible entre el
+    mcd de n y a. Entonces, necesitamos calcular el mcd de n y a, y hacer divi-
+    sión (entera) con b, si esta división es igual a 0, significa que podemos
+    buscar la solución a la congruencia. Si es distinto de 0, esta solución no
+    existe.
 
-    Para esto, se usará la función auxiliar.
+    Además, el mcd, va a determinar el número de soluciones diferentes, que tie-
+    ne la congruencia lienal.
 
     (~= representa el símbolo de congruencia).
   """
   def solve(a,b,n) do
-    if mcd(a,n) == 1 do
-      "La ecuación #{inspect a} x ~= #{inspect b} mod #{inspect n} tiene solución."
+    mcd = mcd(n,a)
+    if div(mcd,b) == 0 do
+      if mcd == 1 do
+        "La ecuación #{inspect a} x ~= #{inspect b} mod #{inspect n} tiene #{inspect mcd} solución."
+      else
+        "La ecuación #{inspect a} x ~= #{inspect b} mod #{inspect n} tiene #{inspect mcd} soluciones."
+      end
     else
       "La ecuación #{inspect a} x ~= #{inspect b} mod #{inspect n} no tiene solcuión."
     end
