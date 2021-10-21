@@ -87,6 +87,7 @@ defmodule Module1 do
         :error
       n < 0 ->
         [:-] ++ digits(abs(n))
+      # Esto es para agregar un digito a la lista. Elixir, transformaba automáticamente el digito en un caracter códificado en Ascii.
       n < 10 ->
         n = Integer.to_string(n)
         n = Integer.parse(n)
@@ -110,7 +111,7 @@ defmodule Module2 do
   end
 
   @doc """
-    Función auxiliar quecalcula el MCD mediante una implementación del Al-
+    Función auxiliar que calcula el MCD mediante una implementación del Al-
     goritmo de Euclides.
   """
   defp mcd(x,y) do
@@ -139,6 +140,19 @@ defmodule Module2 do
 end
 
 defmodule Module3 do
+
+  @doc """
+    Función que devuelve la reversa de una lista.
+
+    Si la lista es vacía devuelve la lista vacía.
+
+    En otro caso, concatena la lista con el elemento en la cabeza, con la lla-
+    mada recursiva a la función sobre la cola.
+  """
+  def rev([]), do: []
+  def rev([x | xs]) do
+    rev(xs) ++ [x]
+  end
 
   @doc """
     Función que busca exhaustivamente si el elemento x se encuentra dentro
@@ -180,48 +194,44 @@ defmodule Module3 do
   end
 
   @doc """
-    Calcula los primos en los primeros 100 números. Para esto, se va a
-    hacer uso de 3 estrcutras auxiliares. Una lista con los números en
-    el rango 2 a n. Una lista que guardará a los primos encontrados, y
-    una lista que guardará a los números compuestos que se generen.
+    Para generar los números primos de 2 a n. Vamos a verificar, que la entrada
+    sea un número mayor que 2.
+
+    En caso de ser afirmativo, construye una lista, apartir del rango de 2 a n.
+
+    Y manda llamar a la función auxiliar sieve_of_erathostenes_recursive, que
+    va a resolver el problema.
   """
   def sieve_of_erathostenes(n) do
-    if n < 2 do
+    if n < 2 && is_number(n) do
       "La entrada es inválida."
     else
       rango = 2 .. n
       nums = Enum.to_list(rango)
-      prims = []
-      comps = []
-      prims = sieve_of_erathostenes_recursion(nums, prims, comps)
-      prims
+      sieve_of_erathostenes_recursive(nums)
     end
   end
 
   @doc """
-    Función auxiliar, va a recorrer la lista en el rango 2 a n,
-    y va a vérificar que el elemento en la cabeza n, no sea un
-    número compuesto.
+    Esta función es destructiva, significa que va a modificar la estructura de
+    datos que recibe como entrada (en este caso una lista). Se podría plantear
+    una función, que reciba la lista original y construya una lista nueva. Sin
+    embargo, por razones de optimización de memoria, y como estamos trabajando
+    en paradigma funcional, se opto por esta alternativa.
 
-    Si esto se cumple, va a agregar a x a los números primos, y
-    va a descubrir los números compuestos que génera en la lista
-    orginal. Esto es, aplicando módulo, utilizando la función de
-    Enum, filter.
+    Lo que va a hacer esta función es tomar el primer elemento de la lista x, y
+    va a eliminar de esta, todos aquellos elementos y, tales que mod x y = 0.
+    Es decir, todos aquellos elementos que son múltiplos de x. Por definición
+    un número primo, solo es múltiplo de sí mismo y 1. Por lo que, estamos
+    quitando todos los números compuestos de la lista.
 
-    Adicionalmente, eliminara de la lista original todos los ele-
-    mentos que sean compuestos, para evitar tener que evaluarlos
-    nuevamente. Esto mejora ligeramente la eficienca.
+    Este proceso, lo va a hacer recursivamente, añadiendo el elemento x al ini-
+    cio de la lista, hasta, llegar a la lista vacía.
   """
-  defp sieve_of_erathostenes_recursion([], prims, _), do: prims
-  defp sieve_of_erathostenes_recursion([x | xs], prims, comps) do
-    if !(x in  comps) do
-      prims = prims ++ [x]
-      comps = comps ++ Enum.filter(xs, fn y -> (rem(y,x) == 0) && !(y in comps) end)
-      xs = Enum.filter(xs, fn x -> !(x in comps) end)
-      sieve_of_erathostenes_recursion(xs, prims, comps)
-    else
-      sieve_of_erathostenes_recursion(xs, prims, comps)
-    end
+  defp sieve_of_erathostenes_recursive([]), do: []
+  defp sieve_of_erathostenes_recursive([x | xs]) do
+    xs = Enum.filter(xs, fn y -> rem(y,x) != 0 end)
+    [x] ++ sieve_of_erathostenes_recursive(xs)
   end
 
 end
