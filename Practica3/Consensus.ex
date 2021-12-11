@@ -8,20 +8,48 @@ defmodule Consensus do
     #todos los hilos tengan el mismo número, el cual va a ser enviado vía un
     #mensaje al hilo principal.
     Enum.map(1..n, fn _ ->
-      spawn(fn -> loop(:start, 0, :rand.uniform(10)), end)
+      spawn(fn -> loop(:start, 0, :rand.uniform(10)) end)
     end)
+    #Agregar código es válido.
   end
 
   defp loop(state, value, miss_prob) do
+    #inicia código inamovible.
     if(state == :fail) do
       loop(state, value, miss_prob)
+    end
+    # Termina código inamovible.
     receive do
       {:get_value, caller} ->
-	send(caller, value)
+	send(caller, value) #No modificar.
+	#Aquí se pueden definir más mensajes.
+      {:lider, caller} ->
+	#IO.puts("#{inspect self()}, soy lider") Prints hechos pa ver que jalara
+	#IO.puts("Consenso: #{inspect value}")
+	send(caller, {:sisoy, self()})
+	
+      {:start, caller, vertices}->
+	Enum.each(vertices, fn x ->
+        send(x, {:consenso, value, self()})
+	end)
+	send(caller, {:consenso, value, self()}) 
+	loop(state, value, miss_prob)
+	
+      {:consenso, new_val, lider} ->
+       #IO.puts("#{inspect self()} fui notificado el valor: #{inspect new_val}")
+	# Print de arriba pa ver que jalaba
+	send(lider, {:ok, self()})
+	loop(state, new_val, miss_prob)
+	
+      {:ok, _} -> # Cambiar _ por caller para imprimir
+	#IO.puts("El proceso #{inspect caller} fue notificado")
+	# Print de arriba pa ver que jalaba
+	loop(state, value, miss_prob)
     after
-      1000 -> :ok
+      1000 -> :ok #Aquí analizar porqué está esto aquí. 
     end
-    case value do
+    
+    case state do
       :start ->
 	chosen = :rand.uniform(10000)
 	if(rem(chosen, miss_prob) == 0) do
@@ -30,15 +58,34 @@ defmodule Consensus do
 	  loop(:active, chosen, miss_prob)
 	end
       :fail -> loop(:fail, value, miss_prob)
-      :active -> :ok #Aquí va su código.
+      :active -> loop(:active, value, miss_prob)
     end
   end
 
   def consensus(processes) do
-    Process.sleep(5000)
+    Process.sleep(10000)
     #Aquí va su código, deben de regresar el valor unánime decidido
     #por todos los procesos.
-    :ok
+    [lider|restantes] = getLider(processes)
+    send(lider, {:start, self(), restantes})
+    
+    receive do
+      {:consenso, val, _} ->
+	val
+    end
   end
-  
+
+  # Obtiene el lider y además descarta de izquierda
+  # a derecha a los primeros procesos fallidos antes al lider
+  defp getLider(processes) do
+    [x|xs] = processes
+    send(x, {:lider, self()})
+    receive do
+      {:sisoy, lider} ->
+	#IO.puts("el lider es  #{inspect lider}")
+	[lider|xs]
+    after
+      1000 -> getLider xs
+    end
+  end
 end
